@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#0d1a0d"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>خرج‌یار – مدیریت هزینه</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══ TOKEN SYSTEM – تم اسکناس ═══ */
+:root{
+  --ink0:#0d1a0d; --ink1:#122012; --ink2:#1a2e1a; --ink3:#233a23;
+  --ink4:#2d4a2d; --ink5:#3a5e3a;
+  --gold:#c9a84c; --gold2:#e0c06a; --gold3:#f2d98a; --gold-dim:rgba(201,168,76,.12); --gold-glow:rgba(201,168,76,.3);
+  --red:#c0392b; --green:#27ae60; --blue:#2980b9; --warn:#e67e22;
+  --txt:#f0ecd8; --txt2:#c4bc9e; --txt3:#8a8060; --txt4:#5a5438;
+  --bdr:rgba(201,168,76,.18); --bdr2:rgba(201,168,76,.08);
+  --r:18px; --rsm:11px; --rxs:7px;
+  --font:'Vazirmatn',system-ui,sans-serif;
+  --shadow:0 8px 40px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:var(--font);background:var(--ink0);color:var(--txt);min-height:100vh;overflow-x:hidden}
+
+/* watermark */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:repeating-linear-gradient(45deg,rgba(201,168,76,.018) 0,rgba(201,168,76,.018) 1px,transparent 0,transparent 28px);
+  background-size:28px 28px;}
+
+#app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ══ HEADER ══ */
+header{
+  position:sticky;top:0;z-index:100;height:58px;
+  background:rgba(13,26,13,.97);backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  box-shadow:0 2px 18px rgba(0,0,0,.45);
+}
+.logo{display:flex;align-items:center;gap:9px;font-size:1.3rem;font-weight:900;letter-spacing:-.5px}
+.logo-txt{background:linear-gradient(135deg,var(--gold2),var(--gold3),var(--gold));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.logo-ico{font-size:1.45rem;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)rotate(-3deg)}50%{transform:translateY(-7px)rotate(3deg)}}
+.hdr-r{display:flex;gap:7px;align-items:center}
+.today-chip{font-size:.7rem;font-weight:700;background:var(--gold-dim);border:1px solid var(--bdr);
+  color:var(--gold2);padding:5px 11px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+.ibtn{width:40px;height:40px;border-radius:50%;background:var(--ink3);border:1px solid var(--bdr);
+  color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.97rem;transition:all .22s;font-family:var(--font)}
+.ibtn:hover{background:var(--ink4);color:var(--gold2);border-color:var(--gold)}
+
+/* ══ LAYOUT ══ */
+.wrap{display:flex;gap:20px;padding:20px;max-width:1360px;margin:0 auto;width:100%;flex:1;padding-bottom:82px}
+.main{flex:1;min-width:0}
+.sidebar{width:282px;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
+@media(max-width:980px){.wrap{flex-direction:column}.sidebar{width:100%}}
+
+/* ══ PAGES ══ */
+.page{display:none;animation:fadeUp .28s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ SUMMARY ══ */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:18px}
+.sc{background:linear-gradient(135deg,rgba(26,46,26,.9),rgba(35,58,35,.6));
+  border:1px solid var(--bdr);border-radius:var(--rsm);padding:18px;
+  position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:-28px;left:-28px;width:90px;height:90px;
+  background:radial-gradient(circle,var(--gold-dim),transparent);border-radius:50%;pointer-events:none}
+.sc.hi{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(26,46,26,.9));border-color:rgba(201,168,76,.38)}
+.sc-lbl{font-size:.66rem;color:var(--txt4);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px}
+.sc-val{font-size:1.05rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold2),var(--gold3));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
+
+/* ══ CARD ══ */
+.card{background:linear-gradient(155deg,rgba(26,46,26,.88),rgba(18,32,18,.7));
+  border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:16px;
+  box-shadow:0 4px 22px rgba(0,0,0,.28);position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.card::before{content:'';position:absolute;top:0;right:0;width:110px;height:110px;
+  background:radial-gradient(circle at top right,var(--gold-dim),transparent);pointer-events:none}
+.card-t{font-size:.7rem;font-weight:800;color:var(--txt4);letter-spacing:.9px;text-transform:uppercase;
+  margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-t::before{content:'';width:3px;height:13px;background:var(--gold);border-radius:2px;flex-shrink:0}
+
+/* ══ SIDEBAR CARD ══ */
+.scard{background:linear-gradient(155deg,rgba(26,46,26,.88),rgba(18,32,18,.7));
+  border:1px solid var(--bdr);border-radius:var(--r);padding:18px;
+  box-shadow:0 4px 22px rgba(0,0,0,.28);position:relative;overflow:hidden}
+.scard.gold{background:linear-gradient(155deg,rgba(201,168,76,.11),rgba(26,46,26,.92));border-color:rgba(201,168,76,.28)}
+.scard.grn{background:linear-gradient(155deg,rgba(39,174,96,.11),rgba(26,46,26,.92));border-color:rgba(39,174,96,.22)}
+.scard-t{font-size:.84rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+
+/* ── Budget ── */
+.bi{background:rgba(0,0,0,.32);border-radius:var(--rsm);padding:13px;margin-bottom:9px;border:1px solid var(--bdr2)}
+.bi-n{font-size:.8rem;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.bi-bar{height:5px;background:rgba(201,168,76,.12);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.bi-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .5s}
+.bi-fill.w{background:linear-gradient(90deg,var(--warn),#f39c12)}
+.bi-fill.d{background:linear-gradient(90deg,var(--red),#e74c3c)}
+.bi-s{font-size:.68rem;color:var(--txt4);display:flex;justify-content:space-between}
+
+/* ── Bucket ── */
+.bki{background:rgba(0,0,0,.32);border-radius:var(--rsm);padding:13px;margin-bottom:9px;border:1px solid var(--bdr2)}
+.bki-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.bki-n{font-size:.8rem;font-weight:700}
+.bki-p{font-size:.7rem;color:var(--gold2);font-weight:700}
+.bki-bar{height:5px;background:rgba(39,174,96,.13);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.bki-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),#2ecc71);transition:width .5s}
+.bki-s{font-size:.68rem;color:var(--txt4);display:flex;justify-content:space-between;margin-bottom:7px}
+.bki-acts{display:flex;gap:5px}
+.bki-btn{flex:1;padding:5px 0;font-size:.7rem;font-weight:700;border:1px solid var(--bdr);
+  background:var(--ink3);color:var(--txt3);border-radius:var(--rxs);cursor:pointer;
+  font-family:var(--font);transition:all .2s}
+.bki-btn:hover{background:var(--ink4);color:var(--gold2);border-color:var(--gold)}
+
+/* ══ FORM ══ */
+.aform{display:flex;flex-direction:column;gap:16px}
+.frow{display:flex;gap:10px}
+.fg{flex:1;display:flex;flex-direction:column;gap:5px}
+label{font-size:.76rem;color:var(--txt2);font-weight:700;letter-spacing:.2px}
+input,select,textarea{
+  background:var(--ink3);border:1px solid var(--bdr2);border-radius:var(--rsm);
+  padding:11px 14px;color:var(--txt);font-family:var(--font);font-size:.9rem;
+  outline:none;transition:all .22s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow);background:var(--ink4)}
+select option{background:var(--ink2);color:var(--txt)}
+textarea{resize:vertical;min-height:62px;font-size:.87rem}
+.amw{position:relative}
+.amw input{padding-left:56px}
+.cur-lbl{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:.68rem;color:var(--gold);font-weight:800;pointer-events:none;letter-spacing:.5px}
+
+/* auto badge */
+.abadge{font-size:.7rem;color:var(--green);padding:4px 9px;background:rgba(39,174,96,.12);
+  border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin-top:4px;
+  border:1px solid rgba(39,174,96,.25);font-weight:700}
+
+/* ── Jalali date row ── */
+.jrow{display:flex;gap:7px}
+.jrow .jp{flex:1;display:flex;flex-direction:column;gap:4px}
+.jrow .jp label{font-size:.63rem;color:var(--txt4)}
+.jrow .jp input{padding:10px 8px;font-size:.88rem;text-align:center}
+
+/* ── People input ── */
+.prow{display:flex;flex-wrap:wrap;gap:6px;padding:9px 12px;
+  background:var(--ink3);border:1px solid var(--bdr2);border-radius:var(--rsm);
+  min-height:42px;cursor:text;transition:all .22s;align-items:center}
+.prow:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow);background:var(--ink4)}
+.pchip{display:inline-flex;align-items:center;gap:4px;background:var(--gold-dim);
+  border:1px solid rgba(201,168,76,.32);padding:3px 8px;border-radius:20px;
+  font-size:.75rem;color:var(--gold2);font-weight:700;white-space:nowrap}
+.pchip button{background:none;border:none;color:var(--red);cursor:pointer;font-size:.82rem;padding:0;line-height:1}
+.pinp{background:none;border:none;outline:none;color:var(--txt);
+  font-family:var(--font);font-size:.83rem;min-width:70px;flex:1;padding:1px 3px}
+
+/* ── keyword tags ── */
+.kwtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.kwtag{display:inline-flex;align-items:center;gap:4px;background:var(--ink4);
+  border:1px solid var(--bdr);padding:3px 7px;border-radius:20px;font-size:.7rem;color:var(--txt3)}
+.kwtag button{background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding:0}
+
+/* ══ BUTTONS ══ */
+.btn{padding:12px 18px;border:none;border-radius:var(--rsm);font-family:var(--font);
+  font-size:.9rem;font-weight:700;cursor:pointer;transition:all .22s;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn-p{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d1a0d;box-shadow:0 4px 16px var(--gold-glow)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 22px var(--gold-glow)}
+.btn-p:active{transform:translateY(0)}
+.btn-s{background:var(--ink3);color:var(--txt3);border:1px solid var(--bdr)}
+.btn-s:hover{background:var(--ink4);color:var(--txt);border-color:var(--gold)}
+.btn-d{background:rgba(192,57,43,.14);color:var(--red);border:1px solid rgba(192,57,43,.3)}
+.btn-d:hover{background:rgba(192,57,43,.24)}
+.btn-g{background:rgba(39,174,96,.14);color:var(--green);border:1px solid rgba(39,174,96,.3)}
+.btn-g:hover{background:rgba(39,174,96,.24)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d1a0d;font-weight:800}
+.btn-f{width:100%}
+.btn-sm{padding:7px 11px;font-size:.76rem;width:100%}
+
+/* ══ EXPENSE LIST ══ */
+.elist{display:flex;flex-direction:column;gap:8px}
+.eitem{background:var(--ink3);border:1px solid var(--bdr2);border-radius:var(--rsm);
+  padding:15px 18px;display:flex;align-items:center;gap:13px;cursor:pointer;
+  transition:all .22s;position:relative;overflow:hidden}
+.eitem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--cat-c,var(--gold));border-radius:0 2px 2px 0}
+.eitem:hover{border-color:var(--gold);background:var(--ink4);transform:translateX(-4px)}
+.eico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.einf{flex:1;min-width:0}
+.etit{font-weight:700;font-size:.9rem;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emeta{font-size:.7rem;color:var(--txt4);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.eamt{font-weight:800;font-size:.93rem;color:var(--red);white-space:nowrap}
+.cpill{font-size:.63rem;padding:2px 7px;border-radius:20px;font-weight:700;
+  white-space:nowrap;border:1px solid currentColor;opacity:.9}
+.ppill{font-size:.63rem;padding:2px 7px;border-radius:20px;font-weight:700;
+  background:var(--gold-dim);color:var(--gold2);border:1px solid rgba(201,168,76,.28)}
+
+/* ══ MODAL ══ */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.83);backdrop-filter:blur(14px);
+  z-index:200;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .22s}
+.moverlay.open{opacity:1;pointer-events:all}
+.modal{background:linear-gradient(155deg,rgba(26,46,26,.98),rgba(15,26,15,.98));
+  border:1px solid var(--bdr);border-radius:24px 24px 0 0;
+  padding:24px 20px;width:100%;max-width:820px;max-height:90vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 -4px 36px rgba(0,0,0,.55);position:relative}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.moverlay.open .modal{transform:translateY(0)}
+.mhdr{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--bdr2)}
+.mtit{font-size:1.02rem;font-weight:800}
+.dh{width:36px;height:4px;background:var(--ink5);border-radius:2px;margin:-8px auto 13px}
+
+/* ══ ANALYTICS ══ */
+.brow{margin-bottom:13px}
+.btop{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.bname{font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.bval{font-size:.76rem;font-weight:700}
+.btrack{height:7px;background:rgba(201,168,76,.08);border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px;transition:width .8s ease}
+
+/* ══ FILTERS ══ */
+.fbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:13px;-webkit-overflow-scrolling:touch}
+.fbar::-webkit-scrollbar{display:none}
+.fchip{padding:6px 13px;border-radius:22px;border:1.5px solid var(--bdr2);background:var(--ink3);
+  color:var(--txt3);font-size:.74rem;cursor:pointer;white-space:nowrap;
+  font-family:var(--font);transition:all .22s;font-weight:700}
+.fchip:hover{border-color:var(--gold);background:var(--ink4)}
+.fchip.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d1a0d;
+  border-color:var(--gold);box-shadow:0 3px 13px var(--gold-glow)}
+
+/* ══ MONTH NAV ══ */
+.mnav{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--ink2);border:1px solid var(--bdr);border-radius:var(--rsm);margin-bottom:13px}
+.mnav button{background:none;border:none;color:var(--txt3);font-size:1rem;cursor:pointer;
+  padding:4px 9px;transition:all .2s;font-weight:700}
+.mnav button:hover{color:var(--gold);transform:scale(1.18)}
+.mlbl{flex:1;text-align:center;font-weight:700;font-size:.92rem}
+
+/* ══ SETTINGS ══ */
+.ssec{margin-bottom:20px}
+.shdr{font-size:.68rem;color:var(--txt4);font-weight:800;letter-spacing:.9px;
+  margin-bottom:7px;padding-right:3px;text-transform:uppercase}
+.srow{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;background:var(--ink2);border:1px solid var(--bdr2);
+  border-radius:var(--rsm);margin-bottom:5px;font-size:.87rem;
+  cursor:pointer;transition:all .22s}
+.srow:hover{background:var(--ink3);border-color:var(--gold)}
+.srow .r{color:var(--txt4);font-size:.8rem;font-weight:600}
+.srow.dnr{color:var(--red)}
+
+/* ══ CAT MANAGER ══ */
+.cmi{background:var(--ink2);border:1px solid var(--bdr2);border-radius:var(--rsm);
+  padding:11px;margin-bottom:7px}
+.cmh{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.cmtog{font-size:.7rem;color:var(--txt4);margin-right:auto;transition:transform .2s}
+.cmh.open .cmtog{transform:rotate(180deg)}
+.cmbody{display:none;padding-top:9px;border-top:1px solid var(--bdr2);margin-top:9px}
+.cmbody.open{display:block}
+.kwadd{display:flex;gap:6px;margin-bottom:7px}
+.kwadd input{padding:8px 10px;font-size:.8rem;flex:1}
+.kwadd button{padding:8px 12px;background:var(--gold);color:#0d1a0d;
+  border:none;border-radius:var(--rxs);cursor:pointer;font-weight:800;
+  font-family:var(--font);font-size:.8rem;transition:all .2s}
+.kwadd button:hover{background:var(--gold2)}
+
+/* ══ SECTION TITLE ══ */
+.stit{font-size:.94rem;font-weight:800;margin-bottom:11px;
+  display:flex;align-items:center;gap:7px;letter-spacing:-.2px}
+
+/* ══ DONUT ══ */
+.donw{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.dleg{display:flex;flex-direction:column;gap:7px;flex:1;min-width:110px}
+.dlr{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--txt2)}
+.dld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ══ EMPTY ══ */
+.empty{text-align:center;padding:48px 20px;color:var(--txt4)}
+.eico{font-size:2.8rem;margin-bottom:12px;opacity:.35;animation:bounce 2.5s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.empty p{font-size:.86rem;line-height:1.8}
+
+/* ══ FAB ══ */
+.fab{position:fixed;bottom:80px;left:24px;width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d1a0d;
+  border:none;font-size:1.75rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 5px 20px var(--gold-glow);z-index:100;transition:all .22s;font-weight:900}
+.fab:hover{transform:scale(1.1);box-shadow:0 7px 26px var(--gold-glow)}
+.fab:active{transform:scale(.95)}
+
+/* ══ BOTTOM NAV ══ */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(13,26,13,.97);backdrop-filter:blur(20px);
+  border-top:1px solid var(--bdr);display:flex;height:66px;
+  padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -3px 18px rgba(0,0,0,.35)}
+.nitem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;color:var(--txt4);cursor:pointer;transition:all .22s;font-size:.6rem;
+  font-weight:700;border:none;background:none;font-family:var(--font)}
+.nico{font-size:1.22rem;transition:all .22s}
+.nitem.active{color:var(--gold2)}
+.nitem.active .nico{transform:scale(1.18)}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%)translateY(16px);
+  background:var(--ink4);border:1px solid var(--bdr);color:var(--txt);
+  padding:10px 19px;border-radius:26px;font-size:.8rem;font-weight:700;z-index:300;
+  opacity:0;transition:all .26s;white-space:nowrap;box-shadow:var(--shadow);pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)translateY(0)}
+
+@media(max-width:480px){.sg{grid-template-columns:1fr}.frow{flex-direction:column}.jrow{flex-wrap:wrap}.donw{flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="logo"><span class="logo-ico">💵</span><span class="logo-txt">خرج‌یار</span></div>
+  <div class="hdr-r">
+    <div class="today-chip" id="today-chip">—</div>
+    <button class="ibtn" onclick="exportCSV()" title="خروجی">📊</button>
+    <button class="ibtn" onclick="nav('settings',document.querySelector('[data-p=settings]'))" title="تنظیمات">⚙️</button>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="main">
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="sg">
+      <div class="sc hi"><div class="sc-lbl">مجموع این ماه</div><div class="sc-val" id="t-month">۰</div></div>
+      <div class="sc"><div class="sc-lbl">تعداد تراکنش</div><div class="sc-val" id="t-count">۰</div></div>
+      <div class="sc"><div class="sc-lbl">بیشترین دسته</div><div class="sc-val" id="t-cat" style="font-size:.82rem">—</div></div>
+      <div class="sc"><div class="sc-lbl">میانگین روزانه</div><div class="sc-val" id="t-avg">۰</div></div>
+    </div>
+    <div class="card">
+      <div class="card-t">توزیع هزینه‌ها</div>
+      <div class="donw">
+        <svg id="donut" viewBox="0 0 200 200" width="148" height="148" style="display:block;flex-shrink:0"></svg>
+        <div class="dleg" id="dleg"></div>
+      </div>
+    </div>
+    <div class="stit">📋 آخرین هزینه‌ها</div>
+    <div class="elist" id="recent-list"></div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="page" id="page-expenses">
+    <div class="mnav">
+      <button onclick="cm(-1)">◀</button>
+      <div class="mlbl" id="m-display">—</div>
+      <button onclick="cm(1)">▶</button>
+    </div>
+    <div class="fbar" id="cat-fbar"></div>
+    <div class="elist" id="all-list"></div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="page" id="page-analytics">
+    <div class="card">
+      <div class="card-t">هزینه بر اساس دسته</div>
+      <div id="barchart"></div>
+    </div>
+    <div class="card">
+      <div class="card-t">روند ۶ ماه اخیر</div>
+      <canvas id="tcanvas" style="width:100%;height:auto;display:block"></canvas>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div class="page" id="page-categories">
+    <div class="card">
+      <div class="card-t">دسته‌ها و کلمات کلیدی</div>
+      <p style="font-size:.8rem;color:var(--txt4);margin-bottom:13px;line-height:1.7">روی هر دسته کلیک کنید تا کلمات کلیدی را ویرایش کنید. این کلمات در تشخیص خودکار استفاده می‌شوند.</p>
+      <div id="cat-mgr"></div>
+    </div>
+    <div class="card">
+      <div class="card-t">➕ دسته سفارشی</div>
+      <div class="aform">
+        <div class="frow">
+          <div class="fg"><label>نام دسته</label><input type="text" id="nc-name" placeholder="مثلاً: کادو، پت..."/></div>
+          <div class="fg" style="flex:0 0 62px"><label>آیکون</label><input type="text" id="nc-emoji" placeholder="🎁" maxlength="2" style="text-align:center;font-size:1.2rem"/></div>
+        </div>
+        <div class="fg"><label>کلمات کلیدی (با ویرگول جدا)</label><input type="text" id="nc-kw" placeholder="کادو، هدیه، gift..."/></div>
+        <button class="btn btn-p btn-f" onclick="addCC()">➕ اضافه کردن</button>
+      </div>
+      <div style="margin-top:14px" id="cc-list"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="ssec">
+      <div class="shdr">واحد پول</div>
+      <div class="srow"><span>واحد فعلی</span><span class="r" id="cur-disp">تومان</span></div>
+      <div class="srow" onclick="changeCur()"><span>تغییر واحد</span><span class="r">←</span></div>
+    </div>
+    <div class="ssec">
+      <div class="shdr">داده‌ها</div>
+      <div class="srow" onclick="exportCSV()"><span>📤 خروجی CSV</span><span class="r">←</span></div>
+      <div class="srow dnr" onclick="clearAll()"><span>🗑️ پاک کردن همه</span><span class="r">←</span></div>
+    </div>
+    <div class="ssec">
+      <div class="shdr">درباره</div>
+      <div class="srow" style="cursor:default"><span>خرج‌یار</span><span class="r">نسخه ۵.۰</span></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="scard gold">
+    <div class="scard-t">
+      <span>💰 بودجهٔ ماهانه</span>
+      <button class="ibtn" style="width:28px;height:28px;font-size:.82rem" onclick="openModal('bud-modal');document.getElementById('bud-name').focus()">+</button>
+    </div>
+    <div id="bud-list"><div style="color:var(--txt4);text-align:center;padding:12px;font-size:.8rem">بودجه‌ای ثبت نشده</div></div>
+  </div>
+  <div class="scard grn">
+    <div class="scard-t">
+      <span>🎁 اهداف پس‌انداز</span>
+      <button class="ibtn" style="width:28px;height:28px;font-size:.82rem" onclick="openModal('buck-modal');document.getElementById('bk-name').focus()">+</button>
+    </div>
+    <div id="bk-list"><div style="color:var(--txt4);text-align:center;padding:12px;font-size:.8rem">هدفی ثبت نشده</div></div>
+  </div>
+</div>
+</div><!-- /wrap -->
+
+<button class="fab" onclick="openAddModal()">+</button>
+<nav class="bnav">
+  <button class="nitem active" data-p="home" onclick="nav('home',this)"><span class="nico">🏠</span><span>خانه</span></button>
+  <button class="nitem" data-p="expenses" onclick="nav('expenses',this)"><span class="nico">📄</span><span>هزینه‌ها</span></button>
+  <button class="nitem" data-p="analytics" onclick="nav('analytics',this)"><span class="nico">📊</span><span>آمار</span></button>
+  <button class="nitem" data-p="categories" onclick="nav('categories',this)"><span class="nico">🏷️</span><span>دسته‌ها</span></button>
+  <button class="nitem" data-p="settings" onclick="nav('settings',this)"><span class="nico">⚙️</span><span>تنظیمات</span></button>
+</nav>
+</div><!-- /app -->
+
+<!-- ADD MODAL -->
+<div class="moverlay" id="add-modal" onclick="closeClick(event,'add-modal')">
+ <div class="modal">
+  <div class="dh"></div>
+  <div class="mhdr"><span class="mtit">➕ ثبت هزینه جدید</span><button class="ibtn" style="width:33px;height:33px" onclick="closeModal('add-modal')">✕</button></div>
+  <div class="aform">
+    <div class="fg"><label>عنوان هزینه</label>
+      <input type="text" id="a-title" placeholder="مثلاً: ناهار، بنزین، دکتر..." oninput="autoCat()" autocomplete="off"/>
+      <div id="a-abadge" class="abadge" style="display:none">✅ تشخیص خودکار: <span id="a-acat"></span></div>
+    </div>
+    <div class="fg"><label>تاریخ شمسی</label>
+      <div class="jrow">
+        <div class="jp"><label>سال شمسی</label><input type="number" id="a-yr" placeholder="1404" min="1300" max="1500"/></div>
+        <div class="jp"><label>ماه (1–12)</label><input type="number" id="a-mo" placeholder="3" min="1" max="12"/></div>
+        <div class="jp"><label>روز (1–31)</label><input type="number" id="a-dy" placeholder="29" min="1" max="31"/></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>مبلغ</label>
+        <div class="amw"><input type="text" id="a-amt" placeholder="0" inputmode="numeric" oninput="fmtAmt(this)"/><span class="cur-lbl" id="cur-a">تومان</span></div>
+      </div>
+      <div class="fg"><label>دسته‌بندی</label><select id="a-cat"></select></div>
+    </div>
+    <div class="fg"><label>مربوط به چه کسی؟ <span style="font-weight:400;color:var(--txt4)">(اختیاری – Enter برای افزودن)</span></label>
+      <div class="prow" id="prow-a" onclick="document.getElementById('pinp-a').focus()">
+        <input class="pinp" id="pinp-a" placeholder="نام + Enter..." onkeydown="handlePerson(event,'a')"/>
+      </div>
+    </div>
+    <div class="fg"><label>یادداشت <span style="font-weight:400;color:var(--txt4)">(اختیاری)</span></label>
+      <textarea id="a-note" placeholder="توضیحات..."></textarea>
+    </div>
+    <button class="btn btn-p btn-f" onclick="saveExp()">✅ ثبت هزینه</button>
+  </div>
+ </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="moverlay" id="edit-modal" onclick="closeClick(event,'edit-modal')">
+ <div class="modal">
+  <div class="dh"></div>
+  <div class="mhdr"><span class="mtit">✏️ ویرایش هزینه</span><button class="ibtn" style="width:33px;height:33px" onclick="closeModal('edit-modal')">✕</button></div>
+  <div class="aform">
+    <input type="hidden" id="e-id"/>
+    <div class="fg"><label>عنوان</label><input type="text" id="e-title"/></div>
+    <div class="fg"><label>تاریخ شمسی</label>
+      <div class="jrow">
+        <div class="jp"><label>سال</label><input type="number" id="e-yr" min="1300" max="1500"/></div>
+        <div class="jp"><label>ماه</label><input type="number" id="e-mo" min="1" max="12"/></div>
+        <div class="jp"><label>روز</label><input type="number" id="e-dy" min="1" max="31"/></div>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>مبلغ</label>
+        <div class="amw"><input type="text" id="e-amt" inputmode="numeric" oninput="fmtAmt(this)"/><span class="cur-lbl" id="cur-e">تومان</span></div>
+      </div>
+      <div class="fg"><label>دسته‌بندی</label><select id="e-cat"></select></div>
+    </div>
+    <div class="fg"><label>مربوط به</label>
+      <div class="prow" id="prow-e" onclick="document.getElementById('pinp-e').focus()">
+        <input class="pinp" id="pinp-e" placeholder="نام + Enter..." onkeydown="handlePerson(event,'e')"/>
+      </div>
+    </div>
+    <div class="fg"><label>یادداشت</label><textarea id="e-note"></textarea></div>
+    <div style="display:flex;gap:9px;margin-top:5px">
+      <button class="btn btn-d" style="flex:1" onclick="delExp()">🗑️ حذف</button>
+      <button class="btn btn-p" style="flex:2" onclick="updateExp()">💾 ذخیره</button>
+    </div>
+  </div>
+ </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div class="moverlay" id="bud-modal" onclick="closeClick(event,'bud-modal')">
+ <div class="modal">
+  <div class="dh"></div>
+  <div class="mhdr"><span class="mtit">💰 بودجه جدید</span><button class="ibtn" style="width:33px;height:33px" onclick="closeModal('bud-modal')">✕</button></div>
+  <div class="aform">
+    <div class="fg"><label>نام</label><input type="text" id="bud-name" placeholder="مثلاً: خوراک..."/></div>
+    <div class="fg"><label>دسته‌بندی</label><select id="bud-cat"></select></div>
+    <div class="fg"><label>مبلغ ماهانه</label>
+      <div class="amw"><input type="text" id="bud-amt" placeholder="0" inputmode="numeric" oninput="fmtAmt(this)"/><span class="cur-lbl">تومان</span></div>
+    </div>
+    <button class="btn btn-gold btn-f" onclick="saveBud()">💾 ذخیره</button>
+  </div>
+ </div>
+</div>
+
+<!-- BUCKET MODAL -->
+<div class="moverlay" id="buck-modal" onclick="closeClick(event,'buck-modal')">
+ <div class="modal">
+  <div class="dh"></div>
+  <div class="mhdr"><span class="mtit">🎁 هدف جدید</span><button class="ibtn" style="width:33px;height:33px" onclick="closeModal('buck-modal')">✕</button></div>
+  <div class="aform">
+    <div class="fg"><label>نام هدف</label><input type="text" id="bk-name" placeholder="مثلاً: سفر، خانه..."/></div>
+    <div class="fg"><label>مبلغ هدف</label>
+      <div class="amw"><input type="text" id="bk-target" placeholder="0" inputmode="numeric" oninput="fmtAmt(this)"/><span class="cur-lbl">تومان</span></div>
+    </div>
+    <button class="btn btn-g btn-f" onclick="saveBk()">🎯 ایجاد</button>
+  </div>
+ </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   JALALI ENGINE – verified algorithm
+═══════════════════════════════════════════════════ */
+function toJalali(gy,gm,gd){
+  /* tested: 2026-06-19 → 1405/3/29 */
+  var g_d_no=365*(gy-1600);
+  var leap=function(y){return Math.floor((y+3)/4)-Math.floor((y+99)/100)+Math.floor((y+399)/400);};
+  g_d_no+=leap(gy-1)-leap(1599);
+  var gmd=[0,31,59,90,120,151,181,212,243,273,304,334];
+  g_d_no+=gmd[gm-1];
+  if(gm>2&&((gy%4===0&&gy%100!==0)||gy%400===0))g_d_no++;
+  g_d_no+=gd-1;
+  var j_d_no=g_d_no-79;
+  var j_np=Math.floor(j_d_no/12053);j_d_no%=12053;
+  var jy=979+33*j_np+4*Math.floor(j_d_no/1461);j_d_no%=1461;
+  if(j_d_no>=366){jy+=Math.floor((j_d_no-1)/365);j_d_no=(j_d_no-1)%365;}
+  var jmd=[31,31,31,31,31,31,30,30,30,30,30,29];
+  var jm=0;
+  for(jm=0;jm<11&&j_d_no>=jmd[jm];jm++)j_d_no-=jmd[jm];
+  return{y:jy,m:jm+1,d:j_d_no+1};
+}
+
+function fromJalali(jy,jm,jd){
+  var jmd=[0,31,62,93,124,155,186,216,246,276,306,336];
+  var jdn=jmd[jm-1]+jd-1;
+  jdn+=365*(jy-979)+Math.floor((jy-979+3)/4)-Math.floor((jy-979+99)/100)+Math.floor((jy-979+399)/400);
+  jdn+=79;
+  var gy=1600+400*Math.floor(jdn/146097);jdn%=146097;
+  if(jdn>=36525){jdn--;gy+=100*Math.floor(jdn/36524);jdn%=36524;if(jdn>=365)jdn++;}
+  gy+=4*Math.floor(jdn/1461);jdn%=1461;
+  if(jdn>=366){gy+=Math.floor((jdn-1)/365);jdn=(jdn-1)%365;}
+  var leap=(gy%4===0&&gy%100!==0)||gy%400===0;
+  var gmd=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+  var gm=0;
+  for(gm=0;gm<12&&jdn>=gmd[gm];gm++)jdn-=gmd[gm];
+  return{y:gy,m:gm+1,d:jdn+1};
+}
+
+function todayJ(){var n=new Date();return toJalali(n.getFullYear(),n.getMonth()+1,n.getDate());}
+
+const JM=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const JMS=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
+
+/* ═══ STATE ═══ */
+var exps   =JSON.parse(localStorage.getItem('xj6_e')||'[]');
+var buds   =JSON.parse(localStorage.getItem('xj6_b')||'[]');
+var bucks  =JSON.parse(localStorage.getItem('xj6_k')||'[]');
+var cCats  =JSON.parse(localStorage.getItem('xj6_cc')||'[]');
+var kw     =JSON.parse(localStorage.getItem('xj6_kw')||'null')||defKw();
+var people =JSON.parse(localStorage.getItem('xj6_ppl')||'[]');
+var cur    =localStorage.getItem('xj6_cur')||'تومان';
+var vM=todayJ().m, vY=todayJ().y;
+var actCat='all';
+var pA=[],pE=[];
+
+function defKw(){return{
+  food:['غذا','رستوران','ناهار','شام','صبحانه','پیتزا','برگر','ساندویچ','کبابی','فست فود','سوپر','سوپرمارکت','خواروبار','میوه','سبزی','نانوایی','نان','قهوه','کافه','چای','دیزی','آبگوشت','سوشی','بستنی','کیک','شیرینی','ماهی','مرغ','گوشت','برنج','لبنیات','خوراک'],
+  transport:['بنزین','پمپ بنزین','تاکسی','اسنپ','دیجی‌کالا','اوبر','مترو','اتوبوس','کرایه','تعمیر ماشین','موتور','لاستیک','روغن موتور','پارکینگ','عوارض','هواپیما','قطار','آژانس','سرویس ماشین'],
+  health:['دکتر','بیمارستان','دارو','داروخانه','آزمایش','عکسبرداری','دندانپزشک','چشم پزشک','ویزیت','فیزیوتراپی','عینک','لنز','کلینیک','پزشک','درمان'],
+  entertainment:['سینما','کنسرت','تئاتر','بازی','نتفلیکس','باشگاه','ورزش','کوهنوردی','سفر','گردش','تور','هتل','استخر','بدنسازی','فیلم','موسیقی','کافی‌شاپ','cafe','کافی'],
+  housing:['اجاره','شارژ','تعمیر منزل','نقاشی','لوله‌کشی','نظافت','مبل','وسایل خانه','یخچال','کولر','بخاری','لوازم خانه'],
+  clothing:['لباس','کفش','کیف','شلوار','پیراهن','تی‌شرت','کت','مانتو','روسری','جوراب','کاپشن','عطر','ادکلن'],
+  education:['کتاب','دوره','آموزش','کلاس','دانشگاه','مدرسه','شهریه','کنکور','زبان','وبینار','کورس','تدریس'],
+  personal:['آرایشگاه','سالن زیبایی','ناخن','کرم','صابون','شامپو','اصلاح','ماساژ','آرایش'],
+  bills:['قبض','تلفن','موبایل','اینترنت','اشتراک','بیمه','مالیات','شارژ کارت','آب','برق','گاز'],
+  other:['سایر','متفرقه'],
+};}
+
+const DCATS={
+  food:     {l:'خوراک و رستوران',e:'🍔',c:'#f97316',b:'rgba(249,115,22,.15)'},
+  transport:{l:'حمل و نقل',      e:'🚗',c:'#3b82f6',b:'rgba(59,130,246,.15)'},
+  health:   {l:'سلامت و پزشکی', e:'🏥',c:'#ef4444',b:'rgba(239,68,68,.15)'},
+  entertainment:{l:'سرگرمی',    e:'🎬',c:'#a855f7',b:'rgba(168,85,247,.15)'},
+  housing:  {l:'مسکن و اجاره',  e:'🏠',c:'#14b8a6',b:'rgba(20,184,166,.15)'},
+  clothing: {l:'پوشاک',         e:'👕',c:'#ec4899',b:'rgba(236,72,153,.15)'},
+  education:{l:'آموزش',         e:'📚',c:'#0ea5e9',b:'rgba(14,165,233,.15)'},
+  personal: {l:'بهداشت',        e:'💄',c:'#f59e0b',b:'rgba(245,158,11,.15)'},
+  bills:    {l:'قبوض',          e:'💡',c:'#c9a84c',b:'rgba(201,168,76,.15)'},
+  other:    {l:'سایر',          e:'📦',c:'#64748b',b:'rgba(100,116,139,.15)'},
+};
+
+function allCats(){
+  var a={...DCATS};
+  cCats.forEach(function(c){a[c.k]={l:c.l,e:c.e,c:c.c||'#c9a84c',b:'rgba(201,168,76,.1)'};});
+  return a;
+}
+
+/* ═══ UTILS ═══ */
+var P=function(n){return String(n).replace(/\d/g,function(d){return'۰۱۲۳۴۵۶۷۸۹'[d];});};
+function fmt(n){var s=String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');return P(s)+' '+cur;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+var sv   =function(){localStorage.setItem('xj6_e',JSON.stringify(exps));};
+var svB  =function(){localStorage.setItem('xj6_b',JSON.stringify(buds));};
+var svK  =function(){localStorage.setItem('xj6_k',JSON.stringify(bucks));};
+var svCC =function(){localStorage.setItem('xj6_cc',JSON.stringify(cCats));};
+var svKw =function(){localStorage.setItem('xj6_kw',JSON.stringify(kw));};
+var svPpl=function(){localStorage.setItem('xj6_ppl',JSON.stringify(people));};
+var svCur=function(){localStorage.setItem('xj6_cur',cur);};
+
+function p2e(inp){
+  var m={'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+  inp.value=inp.value.replace(/[۰-۹]/g,function(c){return m[c];});
+}
+function fmtAmt(inp){
+  // Convert Persian digits first
+  var m={'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+  var raw=inp.value.replace(/[۰-۹]/g,function(c){return m[c];});
+  // Remove non-digit characters except decimal
+  raw=raw.replace(/[^0-9.]/g,'');
+  // Format with commas
+  if(raw===''){inp.value='';return;}
+  var parts=raw.split('.');
+  parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  inp.value=parts.length>1?parts[0]+'.'+parts[1]:parts[0];
+  // Store raw value
+  inp.dataset.raw=raw;
+}
+function getAmt(id){
+  var el=document.getElementById(id);
+  var v=el.dataset.raw||el.value.replace(/,/g,'');
+  return parseFloat(v)||0;
+}
+
+function detectCat(txt){
+  if(!txt||txt.length<2)return null;
+  var lo=txt.toLowerCase();
+  var cats=allCats();
+  for(var k in kw){
+    if(!cats[k])continue;
+    var words=kw[k]||[];
+    for(var i=0;i<words.length;i++){if(lo.indexOf(words[i].toLowerCase())!==-1)return k;}
+  }
+  return null;
+}
+
+function catOpts(){
+  var a=allCats(),h='';
+  for(var k in a)h+='<option value="'+k+'">'+a[k].e+' '+a[k].l+'</option>';
+  return h;
+}
+
+function refreshSelects(){
+  var opts=catOpts();
+  ['a-cat','e-cat','bud-cat'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+/* ═══ NAV ═══ */
+function nav(name,el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nitem').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('page-'+name).classList.add('active');
+  if(el&&el.classList)el.classList.add('active');
+  if(name==='home')renderHome();
+  else if(name==='expenses'){vM=todayJ().m;vY=todayJ().y;renderExps();}
+  else if(name==='analytics')renderAnalytics();
+  else if(name==='categories')renderCats();
+  else if(name==='settings')renderSettings();
+}
+
+/* ═══ HOME ═══ */
+function renderHome(){
+  var t=todayJ();
+  var mes=getME(t.m,t.y);
+  var total=mes.reduce(function(s,e){return s+e.amount;},0);
+  document.getElementById('t-month').textContent=fmt(total);
+  document.getElementById('t-count').textContent=P(mes.length);
+  var ct=catTot(mes),ac=allCats();
+  var top=Object.entries(ct).sort(function(a,b){return b[1]-a[1];})[0];
+  document.getElementById('t-cat').textContent=top?(ac[top[0]]?.e||'')+(ac[top[0]]?.l||top[0]):'—';
+  document.getElementById('t-avg').textContent=t.d>0?fmt(total/t.d):'۰';
+  renderDonut(ct);renderBudSidebar();renderBkSidebar();
+  var recent=[...mes].sort(function(a,b){return(b.y*10000+b.m*100+b.d)-(a.y*10000+a.m*100+a.d);}).slice(0,6);
+  var el=document.getElementById('recent-list');
+  el.innerHTML=recent.length?recent.map(eHTML).join(''):'<div class="empty"><div class="eico">🛍️</div><p>هنوز هزینه‌ای ثبت نشده</p></div>';
+}
+
+function renderDonut(ct){
+  var svg=document.getElementById('donut'),leg=document.getElementById('dleg');
+  var total=Object.values(ct).reduce(function(a,b){return a+b;},0),ac=allCats();
+  if(!total){svg.innerHTML='<text x="100" y="107" text-anchor="middle" fill="#5a5438" font-size="13" font-family="Vazirmatn">بدون داده</text>';leg.innerHTML='';return;}
+  var entries=Object.entries(ct).sort(function(a,b){return b[1]-a[1];});
+  var angle=-Math.PI/2,paths='';
+  entries.forEach(function(en){
+    var cat=en[0],val=en[1];
+    var fr=val/total,sw=fr*2*Math.PI;
+    var x1=100+70*Math.cos(angle),y1=100+70*Math.sin(angle);
+    angle+=sw;
+    var x2=100+70*Math.cos(angle),y2=100+70*Math.sin(angle);
+    var lg=sw>Math.PI?1:0,col=ac[cat]?.c||'#c9a84c';
+    paths+='<path d="M100 100 L'+x1+' '+y1+' A70 70 0 '+lg+' 1 '+x2+' '+y2+'Z" fill="'+col+'" opacity=".85"/>';
+  });
+  svg.innerHTML=paths+'<circle cx="100" cy="100" r="44" fill="#1a2e1a"/>'
+    +'<text x="100" y="97" text-anchor="middle" fill="#c9a84c" font-size="10" font-family="Vazirmatn">دسته</text>'
+    +'<text x="100" y="112" text-anchor="middle" fill="#f0ecd8" font-size="19" font-weight="800" font-family="Vazirmatn">'+P(entries.length)+'</text>';
+  leg.innerHTML=entries.map(function(en){var c=ac[en[0]];return'<div class="dlr"><div class="dld" style="background:'+c?.c+'"></div><span>'+c?.e+' '+c?.l+'</span></div>';}).join('');
+}
+
+/* ═══ SIDEBAR ═══ */
+function getME(m,y){return exps.filter(function(e){return e.m===m&&e.y===y;});}
+function catTot(list){var t={};list.forEach(function(e){t[e.cat]=(t[e.cat]||0)+e.amount;});return t;}
+
+function renderBudSidebar(){
+  var t=todayJ(),mes=getME(t.m,t.y),ct=catTot(mes),ac=allCats();
+  var el=document.getElementById('bud-list');
+  if(!buds.length){el.innerHTML='<div style="color:var(--txt4);text-align:center;padding:11px;font-size:.78rem">بودجه‌ای ثبت نشده</div>';return;}
+  el.innerHTML=buds.map(function(b){
+    var sp=ct[b.cat]||0,pct=Math.min((sp/b.amount)*100,100);
+    var fc=pct>=100?'d':pct>=75?'w':'';
+    return '<div class="bi"><div class="bi-n"><span>'+ac[b.cat]?.e+' '+esc(b.n)+'</span>'
+      +'<button class="ibtn" style="width:20px;height:20px;font-size:.65rem" onclick="delBud(\''+b.id+'\')">✕</button></div>'
+      +'<div class="bi-bar"><div class="bi-fill '+fc+'" style="width:'+pct+'%"></div></div>'
+      +'<div class="bi-s"><span>'+fmt(sp)+' / '+fmt(b.amount)+'</span><span>'+pct.toFixed(0)+'%</span></div></div>';
+  }).join('');
+}
+
+function renderBkSidebar(){
+  var el=document.getElementById('bk-list');
+  if(!bucks.length){el.innerHTML='<div style="color:var(--txt4);text-align:center;padding:11px;font-size:.78rem">هدفی ثبت نشده</div>';return;}
+  el.innerHTML=bucks.map(function(b){
+    var pct=Math.min((b.saved/b.target)*100,100);
+    return '<div class="bki"><div class="bki-h"><span class="bki-n">'+esc(b.n)+'</span><span class="bki-p">'+pct.toFixed(0)+'%</span></div>'
+      +'<div class="bki-bar"><div class="bki-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="bki-s"><span>'+fmt(b.saved)+'</span><span>'+fmt(b.target)+'</span></div>'
+      +'<div class="bki-acts">'
+      +'<button class="bki-btn" onclick="addBk(\''+b.id+'\')">➕ واریز</button>'
+      +'<button class="bki-btn" onclick="subBk(\''+b.id+'\')">➖ برداشت</button>'
+      +'<button class="bki-btn" style="flex:0;padding:5px 7px" onclick="delBk(\''+b.id+'\')">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+/* ═══ EXPENSES PAGE ═══ */
+function renderExps(){
+  document.getElementById('m-display').textContent=JM[vM-1]+' '+P(vY);
+  var mes=getME(vM,vY),ac=allCats();
+  var used=[...new Set(mes.map(function(e){return e.cat;}))];
+  document.getElementById('cat-fbar').innerHTML=
+    '<button class="fchip'+(actCat==='all'?' active':'')+'" onclick="fCat(this,\'all\')">همه</button>'
+    +used.map(function(c){return'<button class="fchip'+(actCat===c?' active':'')+'" onclick="fCat(this,\''+c+'\')">'+(ac[c]?.e||'')+' '+(ac[c]?.l||c)+'</button>';}).join('');
+  var filtered=actCat==='all'?mes:mes.filter(function(e){return e.cat===actCat;});
+  var sorted=[...filtered].sort(function(a,b){return(b.y*10000+b.m*100+b.d)-(a.y*10000+a.m*100+a.d);});
+  var el=document.getElementById('all-list');
+  el.innerHTML=sorted.length?sorted.map(eHTML).join(''):'<div class="empty"><div class="eico">📭</div><p>هزینه‌ای ثبت نشده</p></div>';
+}
+
+function eHTML(e){
+  var ac=allCats(),cat=ac[e.cat]||ac.other;
+  var ds=P(e.d)+'/'+P(e.m)+'/'+P(e.y);
+  var pp=(e.people||[]).map(function(p){return'<span class="ppill">👤 '+esc(p)+'</span>';}).join('');
+  return '<div class="eitem" style="--cat-c:'+cat.c+'" onclick="openEdit(\''+e.id+'\')"><div class="eico" style="background:'+cat.b+';color:'+cat.c+'">'+cat.e+'</div><div class="einf"><div class="etit">'+esc(e.title)+'</div><div class="emeta"><span>'+ds+'</span><span class="cpill" style="color:'+cat.c+';border-color:'+cat.c+'">'+cat.l+'</span>'+pp+(e.note?'<span>📝</span>':'')+'</div></div><div class="eamt">'+fmt(e.amount)+'</div></div>';
+}
+
+function fCat(el,cat){
+  actCat=cat;
+  document.querySelectorAll('.fchip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');renderExps();
+}
+
+function cm(d){
+  vM+=d;if(vM<1){vM=12;vY--;}if(vM>12){vM=1;vY++;}
+  actCat='all';renderExps();
+}
+
+/* ═══ ANALYTICS ═══ */
+function renderAnalytics(){
+  var t=todayJ(),mes=getME(t.m,t.y),ct=catTot(mes);
+  var total=mes.reduce(function(s,e){return s+e.amount;},0),ac=allCats();
+  var el=document.getElementById('barchart');
+  var sorted=Object.entries(ct).sort(function(a,b){return b[1]-a[1];});
+  if(!sorted.length){el.innerHTML='<div class="empty"><div class="eico">📊</div><p>داده‌ای موجود نیست</p></div>';return;}
+  el.innerHTML=sorted.map(function(en){
+    var cat=en[0],val=en[1],c=ac[cat],pct=total>0?(val/total*100).toFixed(1):0;
+    return '<div class="brow"><div class="btop"><span class="bname" style="color:'+c?.c+'">'+c?.e+' '+c?.l+'</span><span class="bval" style="color:'+c?.c+'">'+fmt(val)+'</span></div><div class="btrack"><div class="bfill" style="width:'+pct+'%;background:'+c?.c+'"></div></div></div>';
+  }).join('');
+  renderTrend();
+}
+
+function renderTrend(){
+  var canvas=document.getElementById('tcanvas');
+  var ctx=canvas.getContext('2d'),W=600,H=176;
+  canvas.width=W;canvas.height=H;
+  var t=todayJ(),months=[];
+  for(var i=5;i>=0;i--){
+    var m=t.m-i,y=t.y;if(m<1){m+=12;y--;}
+    months.push({l:JMS[m-1],total:getME(m,y).reduce(function(s,e){return s+e.amount;},0)});
+  }
+  var max=Math.max.apply(null,months.map(function(m){return m.total;}).concat([1]));
+  var pad={t:12,r:12,b:32,l:12},cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  for(var gi=0;gi<=4;gi++){var gy2=pad.t+ch*(1-gi/4);ctx.strokeStyle='rgba(201,168,76,.07)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,gy2);ctx.lineTo(W-pad.r,gy2);ctx.stroke();}
+  var pts=months.map(function(m,i){return{x:pad.l+(i/(months.length-1))*cw,y:pad.t+ch*(1-m.total/max)};});
+  var gr=ctx.createLinearGradient(0,pad.t,0,H-pad.b);gr.addColorStop(0,'rgba(201,168,76,.33)');gr.addColorStop(1,'rgba(201,168,76,0)');
+  ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+ch);pts.forEach(function(p){ctx.lineTo(p.x,p.y);});ctx.lineTo(pts[pts.length-1].x,pad.t+ch);ctx.closePath();ctx.fillStyle=gr;ctx.fill();
+  ctx.beginPath();pts.forEach(function(p,i){if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.4;ctx.lineJoin='round';ctx.stroke();
+  pts.forEach(function(p,i){ctx.beginPath();ctx.arc(p.x,p.y,4.2,0,Math.PI*2);ctx.fillStyle='#e8c96a';ctx.fill();ctx.strokeStyle='#0d1a0d';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#8a8060';ctx.font='11px Vazirmatn,sans-serif';ctx.textAlign='center';ctx.fillText(months[i].l,p.x,H-8);});
+}
+
+/* ═══ CATEGORIES PAGE ═══ */
+function renderCats(){
+  var ac=allCats(),h='';
+  for(var k in DCATS){
+    var cat=DCATS[k],words=kw[k]||[];
+    h+='<div class="cmi"><div class="cmh" onclick="toggleCB(\'cb-'+k+'\')" id="cmh-'+k+'">'
+      +'<div style="width:30px;height:30px;border-radius:8px;background:'+cat.b+';color:'+cat.c+';display:flex;align-items:center;justify-content:center;font-size:1.05rem">'+cat.e+'</div>'
+      +'<span style="font-weight:700;font-size:.85rem">'+cat.l+'</span>'
+      +'<span class="cmtog">'+P(words.length)+' کلمه ▼</span></div>'
+      +'<div class="cmbody" id="cb-'+k+'">'
+      +'<div class="kwadd"><input type="text" id="kwi-'+k+'" placeholder="کلمه جدید..." onkeydown="if(event.key===\'Enter\')addKw(\''+k+'\')"/><button onclick="addKw(\''+k+'\')">+</button></div>'
+      +'<div class="kwtags" id="kwr-'+k+'">'+words.map(function(w){return'<span class="kwtag">'+esc(w)+'<button onclick="delKw(\''+k+'\',\''+w.replace(/'/g,"\\'")+'\')" >✕</button></span>';}).join('')+'</div>'
+      +'</div></div>';
+  }
+  document.getElementById('cat-mgr').innerHTML=h;
+
+  // custom
+  var ch=cCats.length?cCats.map(function(c){
+    var words=kw[c.k]||[];
+    return '<div class="cmi"><div class="cmh" onclick="toggleCB(\'cb-'+c.k+'\')" id="cmh-'+c.k+'">'
+      +'<div style="width:30px;height:30px;border-radius:8px;background:rgba(201,168,76,.1);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:1.05rem">'+c.e+'</div>'
+      +'<span style="font-weight:700;font-size:.85rem">'+esc(c.l)+'</span>'
+      +'<span class="cmtog">'+P(words.length)+' کلمه ▼</span>'
+      +'<button class="ibtn" style="width:22px;height:22px;font-size:.7rem;margin-right:4px" onclick="event.stopPropagation();delCC(\''+c.k+'\')">🗑️</button></div>'
+      +'<div class="cmbody" id="cb-'+c.k+'">'
+      +'<div class="kwadd"><input type="text" id="kwi-'+c.k+'" placeholder="کلمه جدید..." onkeydown="if(event.key===\'Enter\')addKw(\''+c.k+'\')"/><button onclick="addKw(\''+c.k+'\')">+</button></div>'
+      +'<div class="kwtags" id="kwr-'+c.k+'">'+words.map(function(w){return'<span class="kwtag">'+esc(w)+'<button onclick="delKw(\''+c.k+'\',\''+w.replace(/'/g,"\\'")+'\')" >✕</button></span>';}).join('')+'</div>'
+      +'</div></div>';
+  }).join(''):'<div style="color:var(--txt4);text-align:center;padding:18px;font-size:.83rem">دسته سفارشی ثبت نشده</div>';
+  document.getElementById('cc-list').innerHTML=ch;
+}
+
+function toggleCB(id){
+  var el=document.getElementById(id);if(!el)return;
+  el.classList.toggle('open');
+}
+
+function addKw(k){
+  var inp=document.getElementById('kwi-'+k);if(!inp)return;
+  var w=inp.value.trim();if(!w)return;
+  if(!kw[k])kw[k]=[];
+  if(!kw[k].includes(w))kw[k].push(w);
+  svKw();inp.value='';
+  var row=document.getElementById('kwr-'+k);
+  if(row)row.innerHTML=(kw[k]||[]).map(function(ww){return'<span class="kwtag">'+esc(ww)+'<button onclick="delKw(\''+k+'\',\''+ww.replace(/'/g,"\\'")+'\')" >✕</button></span>';}).join('');
+  // update counter
+  var hdr=document.getElementById('cmh-'+k);
+  if(hdr){var tog=hdr.querySelector('.cmtog');if(tog)tog.textContent=P((kw[k]||[]).length)+' کلمه ▼';}
+  toast('✅ کلمه اضافه شد');
+}
+
+function delKw(k,w){
+  if(!kw[k])return;
+  kw[k]=kw[k].filter(function(x){return x!==w;});svKw();
+  var row=document.getElementById('kwr-'+k);
+  if(row)row.innerHTML=(kw[k]||[]).map(function(ww){return'<span class="kwtag">'+esc(ww)+'<button onclick="delKw(\''+k+'\',\''+ww.replace(/'/g,"\\'")+'\')" >✕</button></span>';}).join('');
+  var hdr=document.getElementById('cmh-'+k);
+  if(hdr){var tog=hdr.querySelector('.cmtog');if(tog)tog.textContent=P((kw[k]||[]).length)+' کلمه ▼';}
+}
+
+function addCC(){
+  var name=document.getElementById('nc-name').value.trim();
+  var emoji=document.getElementById('nc-emoji').value.trim();
+  var kwraw=document.getElementById('nc-kw').value.trim();
+  if(!name||!emoji){toast('⚠️ نام و آیکون الزامی');return;}
+  var k='cc_'+uid();
+  cCats.push({k:k,l:name,e:emoji,c:'#c9a84c'});
+  if(kwraw)kw[k]=kwraw.split(/[,،\s]+/).filter(Boolean);
+  svCC();svKw();
+  document.getElementById('nc-name').value='';
+  document.getElementById('nc-emoji').value='';
+  document.getElementById('nc-kw').value='';
+  refreshSelects();renderCats();toast('✅ دسته اضافه شد');
+}
+
+function delCC(k){
+  if(!confirm('این دسته حذف شود؟'))return;
+  cCats=cCats.filter(function(c){return c.k!==k;});
+  delete kw[k];svCC();svKw();refreshSelects();renderCats();toast('🗑️ حذف شد');
+}
+
+/* ═══ SETTINGS ═══ */
+function renderSettings(){
+  document.getElementById('cur-disp').textContent=cur;
+  document.getElementById('cur-a').textContent=cur;
+  document.getElementById('cur-e').textContent=cur;
+}
+function changeCur(){
+  var opts=['تومان','ریال','دلار','یورو','درهم','پوند'];
+  cur=opts[(opts.indexOf(cur)+1)%opts.length];svCur();renderSettings();toast('واحد: '+cur);
+}
+function exportCSV(){
+  var ac=allCats();
+  var rows=[['عنوان','مبلغ','دسته','تاریخ','افراد','یادداشت'],
+    ...exps.map(function(e){return[e.title,e.amount,ac[e.cat]?.l||e.cat,
+      P(e.y)+'/'+P(e.m)+'/'+P(e.d),(e.people||[]).join('-'),e.note||''];})];
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+v+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='kharj_yar_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  toast('📥 دانلود شد');
+}
+function clearAll(){if(!confirm('همه پاک شود؟'))return;exps=[];sv();renderHome();toast('🗑️ پاک شد');}
+
+/* ═══ PEOPLE ═══ */
+function handlePerson(e,mode){
+  var inp=e.target;
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();var name=inp.value.trim();if(!name)return;
+    if(mode==='a'){if(!pA.includes(name))pA.push(name);renderChips('prow-a',pA,'a');}
+    else{if(!pE.includes(name))pE.push(name);renderChips('prow-e',pE,'e');}
+    if(!people.includes(name)){people.push(name);svPpl();}
+    inp.value='';
+  }else if(e.key==='Backspace'&&!inp.value){
+    if(mode==='a'&&pA.length){pA.pop();renderChips('prow-a',pA,'a');}
+    else if(mode==='e'&&pE.length){pE.pop();renderChips('prow-e',pE,'e');}
+  }
+}
+function removePerson(name,mode){
+  if(mode==='a')pA=pA.filter(function(p){return p!==name;});
+  else pE=pE.filter(function(p){return p!==name;});
+  renderChips('prow-'+(mode==='a'?'a':'e'),mode==='a'?pA:pE,mode);
+}
+function renderChips(cid,arr,mode){
+  var con=document.getElementById(cid);if(!con)return;
+  var inp=con.querySelector('.pinp');
+  con.querySelectorAll('.pchip').forEach(function(c){c.remove();});
+  arr.forEach(function(p){
+    var chip=document.createElement('span');chip.className='pchip';
+    chip.innerHTML=esc(p)+'<button onclick="removePerson(\''+p.replace(/'/g,"\\'")+'\',' +"'"+mode+"'"+')">✕</button>';
+    con.insertBefore(chip,inp);
+  });
+}
+
+/* ═══ ADD EXPENSE ═══ */
+function openAddModal(){
+  var t=todayJ();
+  document.getElementById('a-title').value='';
+  document.getElementById('a-amt').value='';
+  document.getElementById('a-yr').value=t.y;
+  document.getElementById('a-mo').value=t.m;
+  document.getElementById('a-dy').value=t.d;
+  document.getElementById('a-cat').innerHTML=catOpts();
+  document.getElementById('a-cat').value='food';
+  document.getElementById('a-note').value='';
+  document.getElementById('a-abadge').style.display='none';
+  pA=[];renderChips('prow-a',[],'a');
+  openModal('add-modal');
+  setTimeout(function(){document.getElementById('a-title').focus();},300);
+}
+
+function autoCat(){
+  var txt=document.getElementById('a-title').value;
+  var cat=detectCat(txt);
+  if(cat){
+    var ac=allCats();
+    document.getElementById('a-cat').value=cat;
+    document.getElementById('a-acat').textContent=(ac[cat]?.e||'')+' '+(ac[cat]?.l||'');
+    document.getElementById('a-abadge').style.display='inline-flex';
+  }else{document.getElementById('a-abadge').style.display='none';}
+}
+
+function saveExp(){
+  var title=document.getElementById('a-title').value.trim();
+  var amount=getAmt('a-amt');
+  var jy=parseInt(document.getElementById('a-yr').value);
+  var jm=parseInt(document.getElementById('a-mo').value);
+  var jd=parseInt(document.getElementById('a-dy').value);
+  var cat=document.getElementById('a-cat').value;
+  var note=document.getElementById('a-note').value.trim();
+  if(!title){toast('⚠️ عنوان الزامی');return;}
+  if(!amount||amount<=0){toast('⚠️ مبلغ معتبر وارد کنید');return;}
+  if(!jy||!jm||!jd||jm<1||jm>12||jd<1||jd>31){toast('⚠️ تاریخ معتبر وارد کنید');return;}
+  exps.push({id:uid(),title:title,amount:amount,y:jy,m:jm,d:jd,cat:cat,note:note,people:[...pA]});
+  sv();closeModal('add-modal');toast('✅ ثبت شد');renderHome();
+}
+
+/* ═══ EDIT EXPENSE ═══ */
+function openEdit(id){
+  var e=exps.find(function(x){return x.id===id;});if(!e)return;
+  document.getElementById('e-id').value=id;
+  document.getElementById('e-title').value=e.title;
+  var fv=String(Math.round(e.amount)).replace(/\B(?=(\d{3})+(?!\d))/g,',');document.getElementById('e-amt').value=fv;document.getElementById('e-amt').dataset.raw=String(e.amount);
+  document.getElementById('e-yr').value=e.y;
+  document.getElementById('e-mo').value=e.m;
+  document.getElementById('e-dy').value=e.d;
+  document.getElementById('e-cat').innerHTML=catOpts();
+  document.getElementById('e-cat').value=e.cat;
+  document.getElementById('e-note').value=e.note||'';
+  pE=[...(e.people||[])];renderChips('prow-e',pE,'e');
+  openModal('edit-modal');
+}
+
+function updateExp(){
+  var id=document.getElementById('e-id').value;
+  var idx=exps.findIndex(function(e){return e.id===id;});if(idx===-1)return;
+  var title=document.getElementById('e-title').value.trim();
+  var amount=getAmt('e-amt');
+  var jy=parseInt(document.getElementById('e-yr').value);
+  var jm=parseInt(document.getElementById('e-mo').value);
+  var jd=parseInt(document.getElementById('e-dy').value);
+  var cat=document.getElementById('e-cat').value;
+  var note=document.getElementById('e-note').value.trim();
+  if(!title||!amount||!jy||!jm||!jd){toast('⚠️ فیلدها را کامل کنید');return;}
+  exps[idx]={...exps[idx],title:title,amount:amount,y:jy,m:jm,d:jd,cat:cat,note:note,people:[...pE]};
+  sv();closeModal('edit-modal');toast('✏️ ویرایش شد');renderHome();renderExps();
+}
+
+function delExp(){
+  if(!confirm('حذف شود؟'))return;
+  var id=document.getElementById('e-id').value;
+  exps=exps.filter(function(e){return e.id!==id;});
+  sv();closeModal('edit-modal');toast('🗑️ حذف شد');renderHome();renderExps();
+}
+
+/* ═══ BUDGET ═══ */
+function saveBud(){
+  var n=document.getElementById('bud-name').value.trim();
+  var cat=document.getElementById('bud-cat').value;
+  var amount=getAmt('bud-amt');
+  if(!n){toast('⚠️ نام الزامی');return;}
+  if(!amount||amount<=0){toast('⚠️ مبلغ الزامی');return;}
+  buds.push({id:uid(),n:n,cat:cat,amount:amount});
+  svB();closeModal('bud-modal');toast('✅ بودجه اضافه شد');renderHome();
+}
+function delBud(id){buds=buds.filter(function(b){return b.id!==id;});svB();toast('🗑️ حذف شد');renderHome();}
+
+/* ═══ BUCKET ═══ */
+function saveBk(){
+  var n=document.getElementById('bk-name').value.trim();
+  var target=getAmt('bk-target');
+  if(!n){toast('⚠️ نام الزامی');return;}
+  if(!target||target<=0){toast('⚠️ مبلغ الزامی');return;}
+  bucks.push({id:uid(),n:n,target:target,saved:0});
+  svK();closeModal('buck-modal');toast('🎯 هدف ایجاد شد');renderHome();
+}
+function addBk(id){
+  var v=prompt('مبلغ واریز:');if(!v||isNaN(v)||parseFloat(v)<=0)return;
+  var b=bucks.find(function(x){return x.id===id;});if(!b)return;
+  b.saved=Math.min(b.saved+parseFloat(v),b.target);svK();toast('✅ واریز شد');renderHome();
+}
+function subBk(id){
+  var v=prompt('مبلغ برداشت:');if(!v||isNaN(v)||parseFloat(v)<=0)return;
+  var b=bucks.find(function(x){return x.id===id;});if(!b)return;
+  b.saved=Math.max(b.saved-parseFloat(v),0);svK();toast('✅ برداشت شد');renderHome();
+}
+function delBk(id){
+  if(!confirm('حذف شود؟'))return;
+  bucks=bucks.filter(function(b){return b.id!==id;});svK();toast('🗑️ حذف شد');renderHome();
+}
+
+/* ═══ MODALS ═══ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeClick(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+
+/* ═══ TOAST ═══ */
+var _tt;
+function toast(msg){
+  clearTimeout(_tt);var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  _tt=setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+/* ═══ INIT ═══ */
+(function init(){
+  var t=todayJ();
+  document.getElementById('today-chip').textContent=P(t.d)+' '+JM[t.m-1]+' '+P(t.y);
+  refreshSelects();
+  renderHome();
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')['add-modal','edit-modal','bud-modal','buck-modal'].forEach(closeModal);
+  });
+})();
+</script>
+</body>
+</html>
