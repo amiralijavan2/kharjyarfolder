@@ -1,0 +1,12 @@
+{
+  "name": "خرج‌یار",
+  "short_name": "خرج‌یار",
+  "description": "مدیریت خصوصی و آفلاین هزینه‌های شخصی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1a0d",
+  "theme_color": "#0d1a0d",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
